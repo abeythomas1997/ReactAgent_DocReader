@@ -9,3 +9,5 @@ requests
 streamlit
 wikipedia
 uvicorn
+langchain-openai
+openai
