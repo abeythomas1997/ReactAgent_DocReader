@@ -1,0 +1,11 @@
+langchain
+langchain_community
+langgraph
+faiss-cpu
+pydantic
+python-dotenv
+beautifulsoup4
+requests
+streamlit
+wikipedia
+uvicorn
