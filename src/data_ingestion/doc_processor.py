@@ -1,20 +1,19 @@
-from typing import List,Union
-from langchain_community.document_loaders import WebBaseLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.schema import Document
+from typing import List, Union
 from pathlib import Path
+
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import (
     WebBaseLoader,
     PyPDFLoader,
     TextLoader,
-    PyPDFDirectoryLoader
+    PyPDFDirectoryLoader,
 )
 
 class DocumentProcessor:
-
     """Handles document loading and processing"""
 
-    def __init__(self,chunck_size:int=500, chunk_overlap:int=100):
+    def __init__(self, chunk_size: int = 500, chunk_overlap: int = 100):
         """
         Initialize document processor
         
@@ -61,7 +60,7 @@ class DocumentProcessor:
                 docs.extend(self.load_from_txt(source))
             else:
                 raise ValueError(f"Unsupported file type: {source}")
-    return docs
+        return docs
 
     def split_documents(self, documents: List[Document]) -> List[Document]:
         """

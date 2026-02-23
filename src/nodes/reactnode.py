@@ -1,12 +1,18 @@
 """LangGraph nodes for RAG workflow + ReAct Agent inside generate_content"""
 
 from typing import List, Optional
+import builtins as _builtins
+import uuid as _uuid
+
+# Ensure 'uuid' is available globally for libraries that reference it in type hints
+setattr(_builtins, "uuid", _uuid)
 from src.state.rag_state import RAGState
 
 from langchain_core.documents import Document
-from langchain_core.tools import Tool
+from langchain_core.tools import Tool, StructuredTool
 from langchain_core.messages import HumanMessage
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
+from pydantic import BaseModel, Field
 
 # Wikipedia tool
 from langchain_community.utilities import WikipediaAPIWrapper
@@ -32,6 +38,11 @@ class RAGNodes:
     def _build_tools(self) -> List[Tool]:
         """Build retriever + wikipedia tools"""
 
+        # Force explicit JSON schemas: {"query": "<string>"} for both tools.
+        # This avoids malformed tool calls and matches what the Groq model is emitting.
+        class RetrieverArgs(BaseModel):
+            query: str = Field(..., description="Search query for the RAG retriever")
+
         def retriever_tool_fn(query: str) -> str:
             docs: List[Document] = self.retriever.invoke(query)
             if not docs:
@@ -43,19 +54,28 @@ class RAGNodes:
                 merged.append(f"[{i}] {title}\n{d.page_content}")
             return "\n\n".join(merged)
 
-        retriever_tool = Tool(
+        retriever_tool = StructuredTool.from_function(
             name="retriever",
-            description="Fetch passages from indexed corpus.",
+            description="Fetch passages from the indexed document corpus. Input must be JSON with a 'query' field.",
             func=retriever_tool_fn,
+            args_schema=RetrieverArgs,
         )
+
+        class WikipediaArgs(BaseModel):
+            query: str = Field(..., description="Wikipedia search query")
 
         wiki = WikipediaQueryRun(
             api_wrapper=WikipediaAPIWrapper(top_k_results=3, lang="en")
         )
-        wikipedia_tool = Tool(
+
+        def wikipedia_tool_fn(query: str) -> str:
+            return wiki.run(query)
+
+        wikipedia_tool = StructuredTool.from_function(
             name="wikipedia",
-            description="Search Wikipedia for general knowledge.",
-            func=wiki.run,
+            description="Search Wikipedia for general knowledge. Input must be JSON with a 'query' field.",
+            func=wikipedia_tool_fn,
+            args_schema=WikipediaArgs,
         )
 
         return [retriever_tool, wikipedia_tool]
@@ -65,10 +85,17 @@ class RAGNodes:
         tools = self._build_tools()
         system_prompt = (
             "You are a helpful RAG agent. "
-            "Prefer 'retriever' for user-provided docs; use 'wikipedia' for general knowledge. "
+            "Prefer the 'retriever' tool for questions about the indexed documents; "
+            "use 'wikipedia' only for general background knowledge when needed. "
+            "When calling a tool, you MUST pass valid JSON arguments. "
+            "For wikipedia, the arguments must look like: {\"query\": \"...\"}. "
             "Return only the final useful answer."
         )
-        self._agent = create_react_agent(self.llm, tools=tools,prompt=system_prompt)
+        self._agent = create_agent(
+            model=self.llm,
+            tools=tools,
+            system_prompt=system_prompt,
+        )
 
     def generate_answer(self, state: RAGState) -> RAGState:
         """
