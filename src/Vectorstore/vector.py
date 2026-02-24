@@ -5,6 +5,11 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from langchain-openai import OpenAIEmbeddings
 
+import streamlit as st
+import os
+
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+
 
 class VectorStore:
     """Manages vector store operations"""
