@@ -13,3 +13,5 @@ wikipedia
 uvicorn
 langchain_core
 langchain-openai
+openai
+langchain>=0.1.0,<1.0.0
