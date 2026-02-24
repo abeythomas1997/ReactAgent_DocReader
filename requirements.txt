@@ -11,7 +11,5 @@ requests
 streamlit
 wikipedia
 uvicorn
-langchain-groq
 langchain_core
-langchain-huggingface 
-sentence_transformers
+langchain-openai

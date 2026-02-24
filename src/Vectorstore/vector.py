@@ -2,23 +2,16 @@
 
 from typing import List
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.documents import Document
-
-import os
-from dotenv import load_dotenv
-load_dotenv() 
-
-os.environ['HF_TOKEN']=os.getenv("HF_TOKEN")
-
+from langchain-openai import OpenAIEmbeddings
 
 
 class VectorStore:
     """Manages vector store operations"""
     
     def __init__(self):
-        """Initialize vector store with HF embeddings"""
-        self.embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        """Initialize vector store with OpenAI embeddings"""
+        self.embedding = OpenAIEmbeddings()
         self.vectorstore = None
         self.retriever = None
     

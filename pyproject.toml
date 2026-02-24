@@ -12,6 +12,7 @@ dependencies = [
     "langchain-core>=1.2.14",
     "langchain-groq>=1.1.2",
     "langchain-huggingface>=1.2.0",
+    "langchain-openai>=1.1.10",
     "langgraph>=1.0.9",
     "pydantic>=2.12.5",
     "python-dotenv>=1.2.1",
