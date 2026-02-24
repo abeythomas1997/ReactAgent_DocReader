@@ -1,6 +1,5 @@
 os
 dotenv
-langchain
 langchain_community
 langgraph
 faiss-cpu
