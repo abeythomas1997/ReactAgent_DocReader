@@ -3,7 +3,7 @@
 from typing import List
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 
 import streamlit as st
 import os
