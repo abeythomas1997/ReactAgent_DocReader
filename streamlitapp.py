@@ -4,6 +4,10 @@ import streamlit as st
 from pathlib import Path
 import sys
 import time
+import streamlit as st
+import os
+
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
 # Add src to path
 sys.path.append(str(Path(__file__).parent))
